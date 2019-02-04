@@ -2,6 +2,7 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(caret)
+library(mboost)
 library(scales)
 
 file_name <- "house_prices.csv"
