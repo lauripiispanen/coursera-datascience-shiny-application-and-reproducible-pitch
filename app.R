@@ -32,21 +32,8 @@ variables <- list(
   "LotArea" = "Lot area"
 )
 
-tuningGrid <- list(
-  "glm" = expand.grid(),
-  "svmLinear3" = expand.grid(cost = 0.25,
-                             loss = 'L1'),
-  "xgbTree" = expand.grid(eta = 0.3,
-                          gamma = 0,
-                          colsample_bytree = 0.8,
-                          min_child_weight = 1,
-                          subsample = 1,
-                          nrounds = c(1:80),
-                          max_depth = 3)
-)
-
 ui <- fluidPage(
-   titlePanel("House prices prediction"),
+   titlePanel("House prices prediction (GLMBoost)"),
    
    sidebarLayout(
       sidebarPanel(
@@ -55,48 +42,17 @@ ui <- fluidPage(
                            choiceNames = as.character(variables),
                            choiceValues = names(variables)),
          h3("Tuning parameters"),
-         sliderInput("nrounds", "Number of boosting rounds:",
+         sliderInput("mstop", "Number of boosting iterations:",
                     min = 1,
-                    max = 120,
-                    value = 80,
-                    step = 1),
-         sliderInput("eta", "Learning rate:",
-                     min = 0.001,
-                     max = 1,
-                     value = 0.3,
-                     step = 0.05),
-         sliderInput("gamma", "Minimum loss reduction:",
-                     min = 0,
-                     max = 100,
-                     value = 0,
-                     step = 1),
-         sliderInput("max_depth", "Maximum tree depth:",
-                     min = 0,
-                     max = 15,
-                     value = 3,
-                     step = 1),
-         sliderInput("min_child_weight", "Minimum child weight:",
-                     min = 0,
-                     max = 15,
-                     value = 1,
-                     step = 1),
-         sliderInput("subsample", "Subsampling ratio:",
-                     min = 0,
-                     max = 1,
-                     value = 1,
-                     step = 0.1),
-         sliderInput("colsample_bytree", "Column subsample by tree:",
-                     min = 0,
-                     max = 1,
-                     value = 0.8,
-                     step = 0.1)
+                    max = 30,
+                    value = 25,
+                    step = 1)
       ),
       mainPanel(
         tabsetPanel(
           tabPanel("Data", plotOutput("chartPlot")),
           tabPanel("Prediction", plotOutput("predictionPlot")),
-          tabPanel("Residuals", plotOutput("residualPlot")),
-          tabPanel("Learning", plotOutput("learningPlot"))
+          tabPanel("Residuals", plotOutput("residualPlot"))
         ),
         conditionalPanel("output.show_model_details",
           h2("Model summary"),
@@ -119,13 +75,8 @@ server <- function(input, output) {
    
    tuning_settings <- debounce(reactive({
      expand.grid(
-       eta = input$eta,
-       gamma = input$gamma,
-       min_child_weight = input$min_child_weight,
-       subsample = input$subsample,
-       nrounds = c(1:input$nrounds),
-       max_depth = input$max_depth,
-       colsample_bytree = input$colsample_bytree
+       mstop = c(input$mstop),
+       prune = TRUE
        )
    }), 1000)
    
@@ -139,9 +90,8 @@ server <- function(input, output) {
          set.seed(12345)
          train(as.formula(frm()), 
              house_train_df,
-             method = "xgbTree",
-             tuneGrid = tuning_settings(),
-             verbose = TRUE)
+             method = "glmboost",
+             tuneGrid = tuning_settings())
        })
      }
    })
@@ -213,13 +163,6 @@ server <- function(input, output) {
      ggplot(house_df, aes(x = GrLivArea, y = SalePrice, color = train_set)) +
        geom_point() +
        scale_y_continuous(labels = comma)
-   })
-   
-   output$learningPlot <- renderPlot({
-     m <- mdl() 
-     if (!is.null(m)) {
-       plot(m)
-     }
    })
    
    output$show_model_details <- reactive({
