@@ -1,0 +1,21 @@
+slide {
+  background-color: #000;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  color: #A1A1A1;
+}
+
+pre.prettyprint {
+  background-color: #313131;
+}
+
+pre.prettyprint span.pln,
+pre.prettyprint span.pun {
+  color: #e1e1e1;  
+}
+
+img {
+  border-radius: 5px;
+  box-shadow: 0px 30px 10px -20px #444;
+}
