@@ -125,7 +125,7 @@ server <- function(input, output) {
      if (!is.null(p_df)) {
        ggplot(p_df, aes(x = GrLivArea, y = SalePrice)) +
          geom_point() +
-         scale_y_continuous(labels = comma)       
+         scale_y_continuous(labels = comma)
      }
    })
    
