@@ -39,6 +39,7 @@ ui <- fluidPage(
    
    sidebarLayout(
       sidebarPanel(
+        actionButton("help", "Show help"),
         checkboxGroupInput("selectedParameters",
                            label = h3("Model parameters"),
                            choiceNames = as.character(variables),
@@ -172,6 +173,49 @@ server <- function(input, output) {
    })
    
    outputOptions(output, "show_model_details", suspendWhenHidden = FALSE)
+
+   helpModal <- function() {
+     modalDialog(
+       title = "Help",
+       "This application demonstrates how selecting different variables ",
+       "and tuning parameters affects the output of a GLMBoost model.",
+       h4("Dataset"),
+       "The example dataset is the",
+       a(
+         href = "https://www.kaggle.com/c/house-prices-advanced-regression-techniques",
+         "Kaggle House Prices dataset"
+       ),
+       ", which contains data of the sale price and 80 other parameters for 1460 house sales.",
+       h4("Model variables and tuning parameters"),
+       "The actual dataset contains 81 variables. Out of this list, ",
+       length(variables),
+       " variables are selected to be used for demonstration purposes. Selecting a number of ",
+       "variables from the left pane builds a model with the formula ",
+       code("SalePrice ~ variable1 + variable2 + ..."),
+       ". In addition to model variables, a tuning parameter that controls the number of boosting ",
+       "rounds applied to the model can be controlled.",
+       h4("Assessing model performance"),
+       "Once a number of variables has been chosen, a GLMBoost model is automatically trained on",
+       "a 75% split of the dataset. 25% of the data is set aside for validation. When the training",
+       "is complete, a performance metric (RMSE, R",
+       tags$sup("2"),
+       " & MAE) is calculated on:",
+       tags$ol(
+        tags$li("the full dataset"),
+        tags$li("the training dataset, and"),
+        tags$li("the validation dataset.")
+       ),
+       "In addition, a plot of predicted sales prices vs. gross living area and residuals ",
+       code("(predicted sale price - actual sale price)"),
+       "are shown on the second and third tab."
+     )
+   }
+
+   observeEvent(input$help, {
+     showModal(helpModal())
+   })
+
+   showModal(helpModal())
 }
 
 # Run the application 
