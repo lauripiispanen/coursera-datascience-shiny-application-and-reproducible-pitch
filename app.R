@@ -30,7 +30,8 @@ variables <- list(
   "ExterQual" = "Exterior quality",
   "YearBuilt" = "Built year",
   "YearRemodAdd" = "Remodel year",
-  "LotArea" = "Lot area"
+  "LotArea" = "Lot area",
+  "YrSold" = "Year sold"
 )
 
 ui <- fluidPage(
